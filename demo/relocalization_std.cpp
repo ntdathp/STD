@@ -117,7 +117,7 @@ int main(int argc, char **argv)
             {
                 std::string ori_time_str = generated_times_vec[cloudInd];
                 std::replace(ori_time_str.begin(), ori_time_str.end(), '.', '_');
-                std::string curr_lidar_path = generated_lidar_path + "KfCloudinW_" + zeroPaddedString(cloudInd, gen_total_size) + ".pcd";
+                std::string curr_lidar_path = generated_lidar_path + "cloud_" + zeroPaddedString(cloudInd, gen_total_size) + ".pcd";
 
                 printf("Reading scan: %s\n", curr_lidar_path.c_str());
 

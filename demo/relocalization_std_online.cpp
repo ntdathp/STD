@@ -82,14 +82,14 @@ int main(int argc, char **argv)
         bool apply_odom_to_cloud;
         std::string map_frame;
 
-        // thống kê
+        
         size_t *frame_count;
         size_t *keyframe_count;
         int *loop_count;
         std::vector<double> *desc_times_ms;
         std::vector<double> *query_times_ms;
 
-        // Boost cần có result_type
+       
         typedef void result_type;
 
         void operator()(const nav_msgs::OdometryConstPtr &odom_msg,
@@ -143,35 +143,40 @@ int main(int argc, char **argv)
                 ROS_INFO(KGRN "[Loop] kf=%zu db=%d score=%.5f" RESET,
                          (*keyframe_count) - 1, search_result.first, search_result.second);
 
-                // ICP refine
                 std::pair<Vector3d, Matrix3d> refined = loop_tf;
                 std_manager->PlaneGeomrtricIcp(std_manager->current_plane_cloud_,
                                                std_manager->plane_cloud_vec_[search_result.first],
                                                refined);
 
-                // Publish pose
                 myTf tf_W_B_est(refined.second, refined.first);
                 const Eigen::Vector3d &t = tf_W_B_est.pos;
-                const Eigen::Quaterniond qe(tf_W_B_est.rot);
+                const Eigen::Quaterniond qe = tf_W_B_est.rot;
+
+                double yaw = qe.toRotationMatrix().eulerAngles(2, 1, 0)(0);
+                if (!std::isfinite(yaw))
+                    yaw = 0.0;
+
+                Eigen::Quaterniond qe_yaw(Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()));
 
                 geometry_msgs::PoseStamped msg;
                 msg.header.stamp = odom_msg->header.stamp;
                 msg.header.frame_id = map_frame;
+
                 msg.pose.position.x = t.x();
                 msg.pose.position.y = t.y();
                 msg.pose.position.z = t.z();
-                msg.pose.orientation.w = qe.w();
-                msg.pose.orientation.x = qe.x();
-                msg.pose.orientation.y = qe.y();
-                msg.pose.orientation.z = qe.z();
-                pub_pose->publish(msg);
 
+                msg.pose.orientation.w = qe_yaw.w();
+                msg.pose.orientation.x = qe_yaw.x();
+                msg.pose.orientation.y = qe_yaw.y();
+                msg.pose.orientation.z = qe_yaw.z();
+
+                pub_pose->publish(msg);
                 (*loop_count)++;
             }
         }
     };
 
-    // Khởi tạo functor với các tham chiếu/ptr context
     RelocCB cb{
         /* std_manager        */ std_manager,
         /* cfg                */ &config_setting,
@@ -184,7 +189,6 @@ int main(int argc, char **argv)
         /* desc_times_ms      */ &desc_times_ms,
         /* query_times_ms     */ &query_times_ms};
 
-    // Đăng ký callback (không cần boost::bind, functor đã hợp lệ cho Boost)
     sync.registerCallback(boost::bind(&RelocCB::operator(), &cb, _1, _2));
     // ==============================
     // 6) Spin & print stats on shutdown
