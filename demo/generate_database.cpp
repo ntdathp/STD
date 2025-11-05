@@ -92,7 +92,7 @@ int main(int argc, char **argv)
             for (int k = 0; k < kf_merged && cloudInd + k < gen_total_size; k++)
             {
                 std::string ori_time_str = std::to_string(generated_times_vec[cloudInd + k]);
-                std::string curr_lidar_path = generated_lidar_path + "/KfCloudinW_" + zeroPaddedString(cloudInd + k, gen_total_size) + ".pcd";
+                std::string curr_lidar_path = generated_lidar_path + "/cloud_" + zeroPaddedString(cloudInd + k, gen_total_size) + ".pcd";
     
                 CloudXYZIPtr kfCloud_(new CloudXYZI());
 

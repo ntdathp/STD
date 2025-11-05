@@ -1,28 +1,28 @@
 /**
-* This file is part of splio.
-* 
-* Copyright (C) 2020 Thien-Minh Nguyen <thienminh.nguyen at ntu dot edu dot sg>,
-* School of EEE
-* Nanyang Technological Univertsity, Singapore
-* 
-* For more information please see <https://britsknguyen.github.io>.
-* or <https://github.com/britsknguyen/splio>.
-* If you use this code, please cite the respective publications as
-* listed on the above websites.
-* 
-* splio is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* splio is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with splio.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of splio.
+ *
+ * Copyright (C) 2020 Thien-Minh Nguyen <thienminh.nguyen at ntu dot edu dot sg>,
+ * School of EEE
+ * Nanyang Technological Univertsity, Singapore
+ *
+ * For more information please see <https://britsknguyen.github.io>.
+ * or <https://github.com/britsknguyen/splio>.
+ * If you use this code, please cite the respective publications as
+ * listed on the above websites.
+ *
+ * splio is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * splio is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with splio.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 //
 // Created by Thien-Minh Nguyen on 15/12/20.
@@ -99,18 +99,21 @@
 using namespace std;
 using namespace Eigen;
 
-#define KNRM  "\x1B[0m"
-#define KRED  "\x1B[31m"
-#define KGRN  "\x1B[32m"
-#define KYEL  "\x1B[33m"
-#define KBLU  "\x1B[34m"
-#define KMAG  "\x1B[35m"
-#define KCYN  "\x1B[36m"
-#define KWHT  "\x1B[37m"
+#define KNRM "\x1B[0m"
+#define KRED "\x1B[31m"
+#define KGRN "\x1B[32m"
+#define KYEL "\x1B[33m"
+#define KBLU "\x1B[34m"
+#define KMAG "\x1B[35m"
+#define KCYN "\x1B[36m"
+#define KWHT "\x1B[37m"
 #define RESET "\033[0m"
 
-#define yolo() printf("Hello line: %s:%d. \n", __FILE__ , __LINE__);
-#define yolos(...) printf("Hello line: %s:%d. ", __FILE__, __LINE__); printf(__VA_ARGS__); std::cout << std::endl;
+#define yolo() printf("Hello line: %s:%d. \n", __FILE__, __LINE__);
+#define yolos(...)                                     \
+    printf("Hello line: %s:%d. ", __FILE__, __LINE__); \
+    printf(__VA_ARGS__);                               \
+    std::cout << std::endl;
 #define MAX_THREADS std::thread::hardware_concurrency()
 
 // /* #region  Custom point type definition --------------------------------------------------------*/
@@ -178,7 +181,7 @@ using namespace Eigen;
 //                                  (double, timestamp, timestamp)
 //                                  (uint16_t, ring, ring))
 
-// struct PointTQXYZI 
+// struct PointTQXYZI
 // {
 //     PCL_ADD_POINT4D
 //     PCL_ADD_INTENSITY;              // preferred way of adding a XYZ+padding
@@ -233,7 +236,6 @@ typedef pcl::PointCloud<PointXYZI>::Ptr CloudXYZIPtr;
 
 // /* #endregion  Custom point type definition -----------------------------------------------------*/
 
-
 // /* #region  Image pointer shortened name -------*/
 
 // typedef sensor_msgs::Image::Ptr RosImgPtr;
@@ -283,8 +285,8 @@ public:
         return elapsed_seconds_.count() * 1000;
     }
 
-#define LASTSTOP(x) printf(#x".LastStop : %f\n", x.GetLastStop());
-#define TOCPRINT(x) printf(#x".Toc : %f\n", x.Toc());
+#define LASTSTOP(x) printf(#x ".LastStop : %f\n", x.GetLastStop());
+#define TOCPRINT(x) printf(#x ".Toc : %f\n", x.Toc());
 
 private:
     std::chrono::time_point<std::chrono::system_clock> start_, end_;
@@ -294,14 +296,14 @@ private:
 template <typename T = double>
 struct myTf
 {
-    Eigen::Quaternion<T>   rot;
+    Eigen::Quaternion<T> rot;
     Eigen::Matrix<T, 3, 1> pos;
 
     myTf Identity()
     {
         return myTf();
     }
-    
+
     myTf(const myTf<T> &other)
     {
         rot = other.rot;
@@ -343,13 +345,13 @@ struct myTf
     myTf(nav_msgs::Odometry odom)
     {
         this->rot = Quaternion<T>(odom.pose.pose.orientation.w,
-                                    odom.pose.pose.orientation.x,
-                                    odom.pose.pose.orientation.y,
-                                    odom.pose.pose.orientation.z);
-                                    
+                                  odom.pose.pose.orientation.x,
+                                  odom.pose.pose.orientation.y,
+                                  odom.pose.pose.orientation.z);
+
         this->pos << odom.pose.pose.position.x,
-                     odom.pose.pose.position.y,
-                     odom.pose.pose.position.z;
+            odom.pose.pose.position.y,
+            odom.pose.pose.position.z;
     }
 
     myTf(Eigen::Transform<T, 3, Eigen::TransformTraits::Affine> transform)
@@ -386,7 +388,7 @@ struct myTf
 
         return p;
     }
-    
+
     // PointPose Pose6D() const
     // {
     //     PointPose p;
@@ -412,7 +414,7 @@ struct myTf
     //     PointPose p;
 
     //     p.t = time;
-        
+
     //     p.x = (float)pos.x();
     //     p.y = (float)pos.y();
     //     p.z = (float)pos.z();
@@ -436,17 +438,17 @@ struct myTf
 
     double roll() const
     {
-        return atan2(rot.x()*rot.w() + rot.y()*rot.z(), 0.5 - (rot.x()*rot.x() + rot.y()*rot.y()))/M_PI*180.0;
+        return atan2(rot.x() * rot.w() + rot.y() * rot.z(), 0.5 - (rot.x() * rot.x() + rot.y() * rot.y())) / M_PI * 180.0;
     }
 
     double pitch() const
     {
-        return asin(-2*(rot.x()*rot.z() - rot.w()*rot.y()))/M_PI*180.0;
+        return asin(-2 * (rot.x() * rot.z() - rot.w() * rot.y())) / M_PI * 180.0;
     }
 
     double yaw() const
     {
-        return atan2(rot.x()*rot.y() + rot.w()*rot.z(), 0.5 - (rot.y()*rot.y() + rot.z()*rot.z()))/M_PI*180.0;
+        return atan2(rot.x() * rot.y() + rot.w() * rot.z(), 0.5 - (rot.y() * rot.y() + rot.z() * rot.z())) / M_PI * 180.0;
     }
 
     myTf inverse() const
@@ -466,7 +468,7 @@ struct myTf
 
     Vector3d operator*(const Vector3d &v) const
     {
-        return (rot*v + pos);
+        return (rot * v + pos);
     }
 
     template <typename NewType>
@@ -512,7 +514,7 @@ typedef myTf<> mytf;
 // class ImuSequence
 // {
 // public:
-    
+
 //    ~ImuSequence()
 //     {
 //         data.clear();
@@ -560,7 +562,7 @@ typedef myTf<> mytf;
 //         if (newSequence.back().t != final_time)
 //             newSequence.push_back(this->interpolate(final_time));
 
-//         return newSequence;    
+//         return newSequence;
 //     }
 
 //     ImuSample interpolate(double t)
@@ -570,7 +572,7 @@ typedef myTf<> mytf;
 //             printf(KMAG "Point time %f is earlier than [%f, %f]. "
 //                         "Returning sample at start time.\n" RESET, t, data.front().t, data.back().t);
 
-//             return data.front();    
+//             return data.front();
 //         }
 
 //         if (t > data.back().t)
@@ -578,7 +580,7 @@ typedef myTf<> mytf;
 //             printf(KMAG "Point time %f is later than [%f, %f]. "
 //                         "Returning sample at start time.\n" RESET, t, data.front().t, data.back().t);
 
-//             return data.back();    
+//             return data.back();
 //         }
 
 //         for(int i = 0; i < data.size(); i++)
@@ -586,11 +588,11 @@ typedef myTf<> mytf;
 //             // Check if we can return the sample at the exact time
 //             if (data[i].t == t)
 //                 return data[i];
-            
+
 //             if (data[i].t < t && t < data[i+1].t)
 //             {
 //                 double s = (t - data[i].t)/(data[i+1].t - data[i].t);
-                
+
 //                 Vector3d gyro = (1-s)*data[i].gyro + s*data[i+1].gyro;
 //                 Vector3d acce = (1-s)*data[i].acce + s*data[i+1].acce;
 
@@ -623,12 +625,12 @@ typedef myTf<> mytf;
 //         ImuSequence s_(*this); s_ += s;
 //         return s_;
 //     }
-    
+
 //     ImuSample& front()
 //     {
 //         return data.front();
 //     }
-    
+
 //     ImuSample& back()
 //     {
 //         return data.back();
@@ -643,7 +645,7 @@ typedef myTf<> mytf;
 //     {
 //         return data.empty();
 //     }
-    
+
 //     double startTime()
 //     {
 //         return data.front().t;
@@ -708,7 +710,7 @@ typedef myTf<> mytf;
 //     deque<Vector3d> V;
 
 //     Vector3d bg; Vector3d ba; Vector3d grav;
-    
+
 //     deque<Vector3d> gyr;
 //     deque<Vector3d> acc;
 
@@ -756,7 +758,7 @@ typedef myTf<> mytf;
 //     void reset(Quaternd &Q0, Vector3d &P0, Vector3d &V0, Vector3d &bg_, Vector3d &ba_, Vector3d &gyr0, Vector3d &acc0, Vector3d &grav_, double t0)
 //     {
 //         t = { t0 };
-        
+
 //         Q = { Q0 };
 //         P = { P0 };
 //         V = { V0 };
@@ -881,7 +883,7 @@ typedef myTf<> mytf;
 //                     Quaternd Qs = Q[i]*Quaternd::Identity().slerp(s, Q[i].inverse()*Q[i+1]);
 //                     Vector3d Ps = (1 - s)*P[i] + s*P[i+1];
 
-//                     return (mytf(Qs, Ps));   
+//                     return (mytf(Qs, Ps));
 //                 }
 //             }
 //         }
@@ -983,7 +985,7 @@ typedef myTf<> mytf;
 // {
 //     int cloudSize = inCloud.size();
 //     CloudXYZI outCloud; outCloud.resize(cloudSize);
-    
+
 //     #pragma omp parallel for num_threads(omp_get_max_threads())
 //     for(int i = 0; i < cloudSize; i++)
 //     {
@@ -998,30 +1000,30 @@ typedef myTf<> mytf;
 
 namespace Util
 {
-//     void ComputeCeresCost(vector<ceres::internal::ResidualBlock *> &res_ids,
-//                           double &cost, ceres::Problem &problem)
-//     {
-//         if (res_ids.size() == 0)
-//         {
-//             cost = -1;
-//             return;
-//         }
+    //     void ComputeCeresCost(vector<ceres::internal::ResidualBlock *> &res_ids,
+    //                           double &cost, ceres::Problem &problem)
+    //     {
+    //         if (res_ids.size() == 0)
+    //         {
+    //             cost = -1;
+    //             return;
+    //         }
 
-//         ceres::Problem::EvaluateOptions e_option;
-//         e_option.residual_blocks = res_ids;
-//         e_option.num_threads = omp_get_max_threads();
-//         problem.Evaluate(e_option, &cost, NULL, NULL, NULL);
-//     }
+    //         ceres::Problem::EvaluateOptions e_option;
+    //         e_option.residual_blocks = res_ids;
+    //         e_option.num_threads = omp_get_max_threads();
+    //         problem.Evaluate(e_option, &cost, NULL, NULL, NULL);
+    //     }
 
-//     static void MergeVector(vector<int> &vecA, vector<int> &vecB)
-//     {
-//         std::sort(vecA.begin(), vecA.end());
-//         std::sort(vecB.begin(), vecB.end());
-//         vector<int> vecTemp = vector<int>(vecA.size() + vecB.size());
-//         vector<int>::iterator it = std::set_union(vecA.begin(), vecA.end(), vecB.begin(), vecB.end(), vecTemp.begin());
-//         vecTemp.resize(it - vecTemp.begin());
-//         vecA = vecTemp;
-//     }
+    //     static void MergeVector(vector<int> &vecA, vector<int> &vecB)
+    //     {
+    //         std::sort(vecA.begin(), vecA.end());
+    //         std::sort(vecB.begin(), vecB.end());
+    //         vector<int> vecTemp = vector<int>(vecA.size() + vecB.size());
+    //         vector<int>::iterator it = std::set_union(vecA.begin(), vecA.end(), vecB.begin(), vecB.end(), vecTemp.begin());
+    //         vecTemp.resize(it - vecTemp.begin());
+    //         vecA = vecTemp;
+    //     }
 
     template <typename PointType>
     sensor_msgs::PointCloud2 publishCloud(ros::Publisher &thisPub,
@@ -1033,7 +1035,7 @@ namespace Util
         tempCloud.header.stamp = thisStamp;
         tempCloud.header.frame_id = thisFrame;
         // if (thisPub.getNumSubscribers() != 0)
-            thisPub.publish(tempCloud);
+        thisPub.publish(tempCloud);
         return tempCloud;
     }
 
@@ -1050,7 +1052,7 @@ namespace Util
     Vector3d SO3Log(Group R)
     {
         Eigen::AngleAxis<double> phi = Eigen::AngleAxis<double>(R);
-        return phi.angle()*phi.axis();
+        return phi.angle() * phi.axis();
     }
 
     // Vector3d SO3Log(Quaternd Q)
@@ -1059,377 +1061,377 @@ namespace Util
     //     return phi.angle()*phi.axis();
     // }
 
-//     static double wrapTo180(double angle)
-//     {
-//         angle = fmod(angle + 180,360);
-//         if (angle < 0)
-//             angle += 360;
-//         return angle - 180;
-//     }
+    //     static double wrapTo180(double angle)
+    //     {
+    //         angle = fmod(angle + 180,360);
+    //         if (angle < 0)
+    //             angle += 360;
+    //         return angle - 180;
+    //     }
 
-//     template <typename PoinT>
-//     static float pointDistance(PoinT p)
-//     {
-//         return sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
-//     }
+    //     template <typename PoinT>
+    //     static float pointDistance(PoinT p)
+    //     {
+    //         return sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
+    //     }
 
-//     template <typename Derived>
-//     static typename Derived::Scalar angleDiff(const Eigen::QuaternionBase<Derived> &q1, const Eigen::QuaternionBase<Derived> &q2)
-//     {
-//         return (Eigen::AngleAxis<typename Derived::Scalar>(q1.inverse()*q2).angle()*180.0/M_PI);
-//     }
+    //     template <typename Derived>
+    //     static typename Derived::Scalar angleDiff(const Eigen::QuaternionBase<Derived> &q1, const Eigen::QuaternionBase<Derived> &q2)
+    //     {
+    //         return (Eigen::AngleAxis<typename Derived::Scalar>(q1.inverse()*q2).angle()*180.0/M_PI);
+    //     }
 
-//     template <typename Derived>
-//     static Eigen::Quaternion<typename Derived::Scalar> deltaQ(const Eigen::MatrixBase<Derived> &theta)
-//     {
-//         typedef typename Derived::Scalar Scalar_t;
+    //     template <typename Derived>
+    //     static Eigen::Quaternion<typename Derived::Scalar> deltaQ(const Eigen::MatrixBase<Derived> &theta)
+    //     {
+    //         typedef typename Derived::Scalar Scalar_t;
 
-//         Eigen::Quaternion<Scalar_t> dq;
+    //         Eigen::Quaternion<Scalar_t> dq;
 
-//         Scalar_t theta_nrm = theta.norm();
+    //         Scalar_t theta_nrm = theta.norm();
 
-//         if (theta_nrm < 1e-9)
-//         {
-//             Eigen::Matrix<Scalar_t, 3, 1> half_theta = theta;
-//             half_theta /= static_cast<Scalar_t>(2.0);
-//             dq.w() = static_cast<Scalar_t>(1.0);
-//             dq.x() = half_theta.x();
-//             dq.y() = half_theta.y();
-//             dq.z() = half_theta.z();
-//         }
-//         else
-//         {
-//             Scalar_t costheta = cos(theta_nrm / 2);
-//             Scalar_t sintheta = sin(theta_nrm / 2);
-//             Eigen::Matrix<Scalar_t, 3, 1> quat_vec = theta / theta_nrm * sintheta;
+    //         if (theta_nrm < 1e-9)
+    //         {
+    //             Eigen::Matrix<Scalar_t, 3, 1> half_theta = theta;
+    //             half_theta /= static_cast<Scalar_t>(2.0);
+    //             dq.w() = static_cast<Scalar_t>(1.0);
+    //             dq.x() = half_theta.x();
+    //             dq.y() = half_theta.y();
+    //             dq.z() = half_theta.z();
+    //         }
+    //         else
+    //         {
+    //             Scalar_t costheta = cos(theta_nrm / 2);
+    //             Scalar_t sintheta = sin(theta_nrm / 2);
+    //             Eigen::Matrix<Scalar_t, 3, 1> quat_vec = theta / theta_nrm * sintheta;
 
-//             dq.w() = costheta;
-//             dq.vec() = quat_vec;
-//         }
+    //             dq.w() = costheta;
+    //             dq.vec() = quat_vec;
+    //         }
 
-//         // printf("dq: %f, %f, %f, %f. norm: %f\n", dq.x(), dq.y(), dq.z(), dq.w(), dq.norm());
+    //         // printf("dq: %f, %f, %f, %f. norm: %f\n", dq.x(), dq.y(), dq.z(), dq.w(), dq.norm());
 
-//         return dq;
-//     }
+    //         return dq;
+    //     }
 
-//     template <typename Derived>
-//     static Eigen::Matrix<typename Derived::Scalar, 3, 3> skewSymmetric(const Eigen::MatrixBase<Derived> &q)
-//     {
-//         Eigen::Matrix<typename Derived::Scalar, 3, 3> ans;
-//         ans << typename Derived::Scalar(0), -q(2), q(1),
-//                q(2), typename Derived::Scalar(0), -q(0),
-//               -q(1), q(0), typename Derived::Scalar(0);
-//         return ans;
-//     }
+    //     template <typename Derived>
+    //     static Eigen::Matrix<typename Derived::Scalar, 3, 3> skewSymmetric(const Eigen::MatrixBase<Derived> &q)
+    //     {
+    //         Eigen::Matrix<typename Derived::Scalar, 3, 3> ans;
+    //         ans << typename Derived::Scalar(0), -q(2), q(1),
+    //                q(2), typename Derived::Scalar(0), -q(0),
+    //               -q(1), q(0), typename Derived::Scalar(0);
+    //         return ans;
+    //     }
 
-//     template <typename Derived>
-//     static Eigen::Quaternion<typename Derived::Scalar> positify(const Eigen::QuaternionBase<Derived> &q)
-//     {
-//         //printf("a: %f %f %f %f", q.w(), q.x(), q.y(), q.z());
-//         //Eigen::Quaternion<typename Derived::Scalar> p(-q.w(), -q.x(), -q.y(), -q.z());
-//         //printf("b: %f %f %f %f", p.w(), p.x(), p.y(), p.z());
-//         //return q.template w() >= (typename Derived::Scalar)(0.0) ? q : Eigen::Quaternion<typename Derived::Scalar>(-q.w(), -q.x(), -q.y(), -q.z());
-//         return q;
-//     }
+    //     template <typename Derived>
+    //     static Eigen::Quaternion<typename Derived::Scalar> positify(const Eigen::QuaternionBase<Derived> &q)
+    //     {
+    //         //printf("a: %f %f %f %f", q.w(), q.x(), q.y(), q.z());
+    //         //Eigen::Quaternion<typename Derived::Scalar> p(-q.w(), -q.x(), -q.y(), -q.z());
+    //         //printf("b: %f %f %f %f", p.w(), p.x(), p.y(), p.z());
+    //         //return q.template w() >= (typename Derived::Scalar)(0.0) ? q : Eigen::Quaternion<typename Derived::Scalar>(-q.w(), -q.x(), -q.y(), -q.z());
+    //         return q;
+    //     }
 
-//     template <typename Derived>
-//     static Eigen::Matrix<typename Derived::Scalar, 4, 4> Qleft(const Eigen::QuaternionBase<Derived> &q)
-//     {
-//         Eigen::Quaternion<typename Derived::Scalar> qq = positify(q);
-//         Eigen::Matrix<typename Derived::Scalar, 4, 4> ans;
-//         ans(0, 0) = qq.w(), ans.template block<1, 3>(0, 1) = -qq.vec().transpose();
-//         ans.template block<3, 1>(1, 0) = qq.vec(), ans.template block<3, 3>(1, 1) = qq.w() * Eigen::Matrix<typename Derived::Scalar, 3, 3>::Identity() + skewSymmetric(qq.vec());
-//         return ans;
-//     }
+    //     template <typename Derived>
+    //     static Eigen::Matrix<typename Derived::Scalar, 4, 4> Qleft(const Eigen::QuaternionBase<Derived> &q)
+    //     {
+    //         Eigen::Quaternion<typename Derived::Scalar> qq = positify(q);
+    //         Eigen::Matrix<typename Derived::Scalar, 4, 4> ans;
+    //         ans(0, 0) = qq.w(), ans.template block<1, 3>(0, 1) = -qq.vec().transpose();
+    //         ans.template block<3, 1>(1, 0) = qq.vec(), ans.template block<3, 3>(1, 1) = qq.w() * Eigen::Matrix<typename Derived::Scalar, 3, 3>::Identity() + skewSymmetric(qq.vec());
+    //         return ans;
+    //     }
 
-//     template <typename Derived>
-//     static Eigen::Matrix<typename Derived::Scalar, 4, 4> Qright(const Eigen::QuaternionBase<Derived> &p)
-//     {
-//         Eigen::Quaternion<typename Derived::Scalar> pp = positify(p);
-//         Eigen::Matrix<typename Derived::Scalar, 4, 4> ans;
-//         ans(0, 0) = pp.w(), ans.template block<1, 3>(0, 1) = -pp.vec().transpose();
-//         ans.template block<3, 1>(1, 0) = pp.vec(), ans.template block<3, 3>(1, 1) = pp.w() * Eigen::Matrix<typename Derived::Scalar, 3, 3>::Identity() - skewSymmetric(pp.vec());
-//         return ans;
-//     }
+    //     template <typename Derived>
+    //     static Eigen::Matrix<typename Derived::Scalar, 4, 4> Qright(const Eigen::QuaternionBase<Derived> &p)
+    //     {
+    //         Eigen::Quaternion<typename Derived::Scalar> pp = positify(p);
+    //         Eigen::Matrix<typename Derived::Scalar, 4, 4> ans;
+    //         ans(0, 0) = pp.w(), ans.template block<1, 3>(0, 1) = -pp.vec().transpose();
+    //         ans.template block<3, 1>(1, 0) = pp.vec(), ans.template block<3, 3>(1, 1) = pp.w() * Eigen::Matrix<typename Derived::Scalar, 3, 3>::Identity() - skewSymmetric(pp.vec());
+    //         return ans;
+    //     }
 
-//     static Eigen::Matrix3d SO3Jright(const Eigen::AngleAxis<double> &phi)
-//     {
-//         Eigen::Matrix3d ans;
-//         double theta = phi.angle();
-//         Eigen::Matrix3d ux = skewSymmetric(phi.axis());
+    //     static Eigen::Matrix3d SO3Jright(const Eigen::AngleAxis<double> &phi)
+    //     {
+    //         Eigen::Matrix3d ans;
+    //         double theta = phi.angle();
+    //         Eigen::Matrix3d ux = skewSymmetric(phi.axis());
 
-//         if (theta == 0.0)
-//         {
-//             ans = Eigen::Matrix3d::Identity();
-//         }
-//         else
-//         {
-//             ans = Eigen::Matrix3d::Identity() - (1 - cos(theta)) / theta * ux + (theta - sin(theta)) / theta * ux * ux;
-//         }
+    //         if (theta == 0.0)
+    //         {
+    //             ans = Eigen::Matrix3d::Identity();
+    //         }
+    //         else
+    //         {
+    //             ans = Eigen::Matrix3d::Identity() - (1 - cos(theta)) / theta * ux + (theta - sin(theta)) / theta * ux * ux;
+    //         }
 
-//         return ans;
-//     }
+    //         return ans;
+    //     }
 
-//     static Eigen::Matrix3d SO3JrightInv(const Eigen::AngleAxis<double> &phi)
-//     {
-//         Eigen::Matrix3d ans;
-//         double theta = phi.angle();
-//         Eigen::Matrix3d ux = skewSymmetric(phi.axis());
+    //     static Eigen::Matrix3d SO3JrightInv(const Eigen::AngleAxis<double> &phi)
+    //     {
+    //         Eigen::Matrix3d ans;
+    //         double theta = phi.angle();
+    //         Eigen::Matrix3d ux = skewSymmetric(phi.axis());
 
-//         if (theta == 0.0)
-//         {
-//             ans = Eigen::Matrix3d::Identity();
-//         }
-//         else
-//         {
-//             ans = Eigen::Matrix3d::Identity() + 0.5 * theta * ux + (1 - theta * (1 + cos(theta)) / 2 / sin(theta)) * ux * ux;
-//         }
+    //         if (theta == 0.0)
+    //         {
+    //             ans = Eigen::Matrix3d::Identity();
+    //         }
+    //         else
+    //         {
+    //             ans = Eigen::Matrix3d::Identity() + 0.5 * theta * ux + (1 - theta * (1 + cos(theta)) / 2 / sin(theta)) * ux * ux;
+    //         }
 
-//         return ans;
-//     }
+    //         return ans;
+    //     }
 
-//     static Eigen::Matrix3d SO3Jleft(const Eigen::AngleAxis<double> &phi)
-//     {
-//         Eigen::Matrix3d ans;
-//         double theta = phi.angle();
-//         Eigen::Matrix3d ux = skewSymmetric(phi.axis());
+    //     static Eigen::Matrix3d SO3Jleft(const Eigen::AngleAxis<double> &phi)
+    //     {
+    //         Eigen::Matrix3d ans;
+    //         double theta = phi.angle();
+    //         Eigen::Matrix3d ux = skewSymmetric(phi.axis());
 
-//         if (theta == 0.0)
-//         {
-//             ans = Eigen::Matrix3d::Identity();
-//         }
-//         else
-//         {
-//             ans = Eigen::Matrix3d::Identity() + (1 - cos(theta)) / theta * ux + (theta - sin(theta)) / theta * ux * ux;
-//         }
+    //         if (theta == 0.0)
+    //         {
+    //             ans = Eigen::Matrix3d::Identity();
+    //         }
+    //         else
+    //         {
+    //             ans = Eigen::Matrix3d::Identity() + (1 - cos(theta)) / theta * ux + (theta - sin(theta)) / theta * ux * ux;
+    //         }
 
-//         return ans;
-//     }
+    //         return ans;
+    //     }
 
-//     static Eigen::Matrix3d SO3JleftInv(const Eigen::AngleAxis<double> &phi)
-//     {
-//         Eigen::Matrix3d ans;
-//         double theta = phi.angle();
-//         Eigen::Matrix3d ux = skewSymmetric(phi.axis());
+    //     static Eigen::Matrix3d SO3JleftInv(const Eigen::AngleAxis<double> &phi)
+    //     {
+    //         Eigen::Matrix3d ans;
+    //         double theta = phi.angle();
+    //         Eigen::Matrix3d ux = skewSymmetric(phi.axis());
 
-//         if (theta == 0.0)
-//         {
-//             ans = Eigen::Matrix3d::Identity();
-//         }
-//         else
-//         {
-//             ans = Eigen::Matrix3d::Identity() - 0.5 * theta * ux + (1 - theta * (1 + cos(theta)) / 2 / sin(theta)) * ux * ux;
-//         }
+    //         if (theta == 0.0)
+    //         {
+    //             ans = Eigen::Matrix3d::Identity();
+    //         }
+    //         else
+    //         {
+    //             ans = Eigen::Matrix3d::Identity() - 0.5 * theta * ux + (1 - theta * (1 + cos(theta)) / 2 / sin(theta)) * ux * ux;
+    //         }
 
-//         return ans;
-//     }
+    //         return ans;
+    //     }
 
-//     static Eigen::Matrix3d YPR2Rot(Eigen::Vector3d ypr)
-//     {
-//         double y = ypr(0) / 180.0 * M_PI;
-//         double p = ypr(1) / 180.0 * M_PI;
-//         double r = ypr(2) / 180.0 * M_PI;
+    //     static Eigen::Matrix3d YPR2Rot(Eigen::Vector3d ypr)
+    //     {
+    //         double y = ypr(0) / 180.0 * M_PI;
+    //         double p = ypr(1) / 180.0 * M_PI;
+    //         double r = ypr(2) / 180.0 * M_PI;
 
-//         Eigen::Matrix3d Rz;
-//         Rz << cos(y), -sin(y), 0.0,
-//               sin(y),  cos(y), 0.0,
-//               0.0,     0.0,    1;
+    //         Eigen::Matrix3d Rz;
+    //         Rz << cos(y), -sin(y), 0.0,
+    //               sin(y),  cos(y), 0.0,
+    //               0.0,     0.0,    1;
 
-//         Eigen::Matrix3d Ry;
-//         Ry << cos(p), 0.0, sin(p),
-//               0.0,    1.0, 0.0,
-//              -sin(p), 0.0, cos(p);
+    //         Eigen::Matrix3d Ry;
+    //         Ry << cos(p), 0.0, sin(p),
+    //               0.0,    1.0, 0.0,
+    //              -sin(p), 0.0, cos(p);
 
-//         Eigen::Matrix3d Rx;
-//         Rx << 1.0, 0.0,     0.0,
-//               0.0, cos(r), -sin(r),
-//               0.0, sin(r),  cos(r);
+    //         Eigen::Matrix3d Rx;
+    //         Rx << 1.0, 0.0,     0.0,
+    //               0.0, cos(r), -sin(r),
+    //               0.0, sin(r),  cos(r);
 
-//         return Rz * Ry * Rx;
-//     }
+    //         return Rz * Ry * Rx;
+    //     }
 
-//     static Eigen::Matrix3d YPR2Rot(double yaw, double pitch, double roll)
-//     {
-//         double y = yaw / 180.0 * M_PI;
-//         double p = pitch / 180.0 * M_PI;
-//         double r = roll / 180.0 * M_PI;
+    //     static Eigen::Matrix3d YPR2Rot(double yaw, double pitch, double roll)
+    //     {
+    //         double y = yaw / 180.0 * M_PI;
+    //         double p = pitch / 180.0 * M_PI;
+    //         double r = roll / 180.0 * M_PI;
 
-//         Eigen::Matrix3d Rz;
-//         Rz << cos(y), -sin(y), 0.0,
-//               sin(y),  cos(y), 0.0,
-//               0.0,     0.0,    1;
+    //         Eigen::Matrix3d Rz;
+    //         Rz << cos(y), -sin(y), 0.0,
+    //               sin(y),  cos(y), 0.0,
+    //               0.0,     0.0,    1;
 
-//         Eigen::Matrix3d Ry;
-//         Ry << cos(p), 0.0, sin(p),
-//               0.0,    1.0, 0.0,
-//              -sin(p), 0.0, cos(p);
+    //         Eigen::Matrix3d Ry;
+    //         Ry << cos(p), 0.0, sin(p),
+    //               0.0,    1.0, 0.0,
+    //              -sin(p), 0.0, cos(p);
 
-//         Eigen::Matrix3d Rx;
-//         Rx << 1.0, 0.0,     0.0,
-//               0.0, cos(r), -sin(r),
-//               0.0, sin(r),  cos(r);
+    //         Eigen::Matrix3d Rx;
+    //         Rx << 1.0, 0.0,     0.0,
+    //               0.0, cos(r), -sin(r),
+    //               0.0, sin(r),  cos(r);
 
-//         return Rz * Ry * Rx;
-//     }
+    //         return Rz * Ry * Rx;
+    //     }
 
-//     static Eigen::Vector3d Rot2YPR(const Eigen::Matrix3d R)
-//     {
-//         Eigen::Vector3d n = R.col(0);
-//         Eigen::Vector3d o = R.col(1);
-//         Eigen::Vector3d a = R.col(2);
+    //     static Eigen::Vector3d Rot2YPR(const Eigen::Matrix3d R)
+    //     {
+    //         Eigen::Vector3d n = R.col(0);
+    //         Eigen::Vector3d o = R.col(1);
+    //         Eigen::Vector3d a = R.col(2);
 
-//         Eigen::Vector3d ypr(3);
-//         double y = atan2(n(1), n(0));
-//         double p = atan2(-n(2), n(0) * cos(y) + n(1) * sin(y));
-//         double r = atan2(a(0) * sin(y) - a(1) * cos(y), -o(0) * sin(y) + o(1) * cos(y));
-//         ypr(0) = y;
-//         ypr(1) = p;
-//         ypr(2) = r;
+    //         Eigen::Vector3d ypr(3);
+    //         double y = atan2(n(1), n(0));
+    //         double p = atan2(-n(2), n(0) * cos(y) + n(1) * sin(y));
+    //         double r = atan2(a(0) * sin(y) - a(1) * cos(y), -o(0) * sin(y) + o(1) * cos(y));
+    //         ypr(0) = y;
+    //         ypr(1) = p;
+    //         ypr(2) = r;
 
-//         return ypr / M_PI * 180.0;
-//     }
+    //         return ypr / M_PI * 180.0;
+    //     }
 
-//     static Eigen::Vector3d Quat2YPR(const Eigen::Quaterniond Q)
-//     {
-//         return Rot2YPR(Q.toRotationMatrix());
-//     }
+    //     static Eigen::Vector3d Quat2YPR(const Eigen::Quaterniond Q)
+    //     {
+    //         return Rot2YPR(Q.toRotationMatrix());
+    //     }
 
-//     static Eigen::Vector3d Quat2YPR(double qx, double qy, double qz, double qw)
-//     {
-//         return Rot2YPR(Quaternd(qw, qx, qy, qz).toRotationMatrix());
-//     }
+    //     static Eigen::Vector3d Quat2YPR(double qx, double qy, double qz, double qw)
+    //     {
+    //         return Rot2YPR(Quaternd(qw, qx, qy, qz).toRotationMatrix());
+    //     }
 
-//     static Eigen::Quaterniond YPR2Quat(Eigen::Vector3d ypr)
-//     {
-//         return Quaterniond(YPR2Rot(ypr));
-//     }
+    //     static Eigen::Quaterniond YPR2Quat(Eigen::Vector3d ypr)
+    //     {
+    //         return Quaterniond(YPR2Rot(ypr));
+    //     }
 
-//     static Eigen::Quaterniond YPR2Quat(double y, double p, double r)
-//     {
-//         return Quaterniond(YPR2Rot(y, p, r));
-//     }
+    //     static Eigen::Quaterniond YPR2Quat(double y, double p, double r)
+    //     {
+    //         return Quaterniond(YPR2Rot(y, p, r));
+    //     }
 
-//     // Finding the roll and pitch from gravity reading.
-//     static Eigen::Matrix3d grav2Rot(const Eigen::Vector3d &g)
-//     {
-//         Eigen::Matrix3d R0;
-//         Eigen::Vector3d ng1 = g.normalized();
-//         Eigen::Vector3d ng2{0, 0, 1.0};
-//         R0 = Eigen::Quaterniond::FromTwoVectors(ng1, ng2).toRotationMatrix();
-//         double yaw = Util::Rot2YPR(R0).x();
-//         R0 = Util::YPR2Rot(Eigen::Vector3d(-yaw, 0, 0)) * R0;
-//         // R0 = Util::ypr2R(Eigen::Vector3d{-90, 0, 0}) * R0;
-//         return R0;
+    //     // Finding the roll and pitch from gravity reading.
+    //     static Eigen::Matrix3d grav2Rot(const Eigen::Vector3d &g)
+    //     {
+    //         Eigen::Matrix3d R0;
+    //         Eigen::Vector3d ng1 = g.normalized();
+    //         Eigen::Vector3d ng2{0, 0, 1.0};
+    //         R0 = Eigen::Quaterniond::FromTwoVectors(ng1, ng2).toRotationMatrix();
+    //         double yaw = Util::Rot2YPR(R0).x();
+    //         R0 = Util::YPR2Rot(Eigen::Vector3d(-yaw, 0, 0)) * R0;
+    //         // R0 = Util::ypr2R(Eigen::Vector3d{-90, 0, 0}) * R0;
+    //         return R0;
 
-//         // // Get z axis, which alines with -g (z_in_G=0,0,1)
-//         // Eigen::Vector3d z_axis = g / g.norm();
+    //         // // Get z axis, which alines with -g (z_in_G=0,0,1)
+    //         // Eigen::Vector3d z_axis = g / g.norm();
 
-//         // // Create an x_axis
-//         // Eigen::Vector3d e_1(1, 0, 0);
+    //         // // Create an x_axis
+    //         // Eigen::Vector3d e_1(1, 0, 0);
 
-//         // // Make x_axis perpendicular to z
-//         // Eigen::Vector3d x_axis = e_1 - z_axis * z_axis.transpose() * e_1;
-//         // x_axis = x_axis / x_axis.norm();
+    //         // // Make x_axis perpendicular to z
+    //         // Eigen::Vector3d x_axis = e_1 - z_axis * z_axis.transpose() * e_1;
+    //         // x_axis = x_axis / x_axis.norm();
 
-//         // // Get z from the cross product of these two
-//         // Eigen::Matrix<double, 3, 1> y_axis = Util::skewSymmetric(z_axis) * x_axis;
+    //         // // Get z from the cross product of these two
+    //         // Eigen::Matrix<double, 3, 1> y_axis = Util::skewSymmetric(z_axis) * x_axis;
 
-//         // // From these axes get rotation
-//         // Eigen::Matrix<double, 3, 3> Ro;
-//         // Ro.block(0, 0, 3, 1) = x_axis;
-//         // Ro.block(0, 1, 3, 1) = y_axis;
-//         // Ro.block(0, 2, 3, 1) = z_axis;
+    //         // // From these axes get rotation
+    //         // Eigen::Matrix<double, 3, 3> Ro;
+    //         // Ro.block(0, 0, 3, 1) = x_axis;
+    //         // Ro.block(0, 1, 3, 1) = y_axis;
+    //         // Ro.block(0, 2, 3, 1) = z_axis;
 
-//         // // Eigen::Quaterniond q0(Ro);
-//         // // q0.normalize();
-//         // return Ro;
-//     }
+    //         // // Eigen::Quaterniond q0(Ro);
+    //         // // q0.normalize();
+    //         // return Ro;
+    //     }
 
-//     static Vector3d transform_pointVec(const mytf &tf, const PointXYZI &pi)
-//     {
-//         Vector3d bodyPoint = tf.rot * Vector3d(pi.x, pi.y, pi.z) + tf.pos;
-//         return bodyPoint;
-//     }
+    //     static Vector3d transform_pointVec(const mytf &tf, const PointXYZI &pi)
+    //     {
+    //         Vector3d bodyPoint = tf.rot * Vector3d(pi.x, pi.y, pi.z) + tf.pos;
+    //         return bodyPoint;
+    //     }
 
-//     template <typename PointT>
-//     static PointT transform_point(const mytf &tf, const PointT &pi)
-//     {
-//         Vector3d pos = tf.rot * Vector3d(pi.x, pi.y, pi.z) + tf.pos;
-        
-//         PointT po = pi;
-//         po.x = pos.x();
-//         po.y = pos.y();
-//         po.z = pos.z();
+    //     template <typename PointT>
+    //     static PointT transform_point(const mytf &tf, const PointT &pi)
+    //     {
+    //         Vector3d pos = tf.rot * Vector3d(pi.x, pi.y, pi.z) + tf.pos;
 
-//         return po;
-//     }
+    //         PointT po = pi;
+    //         po.x = pos.x();
+    //         po.y = pos.y();
+    //         po.z = pos.z();
 
-//     static PointPose transform_point(const mytf &tf, const PointPose &pi)
-//     {
-//         Vector3d pos = tf.rot * Vector3d(pi.x, pi.y, pi.z) + tf.pos;
-//         Quaternd rot = tf.rot * Quaternd(pi.qw, pi.qx, pi.qy, pi.qz);
-        
-//         PointPose po;
-//         po.x  = pos.x();
-//         po.y  = pos.y();
-//         po.z  = pos.z();
-//         po.qx = rot.x();
-//         po.qy = rot.y();
-//         po.qz = rot.z();
-//         po.qw = rot.w();
-//         po.t  = pi.t;
-//         po.intensity = pi.intensity;
+    //         return po;
+    //     }
 
-//         return po;
-//     }
+    //     static PointPose transform_point(const mytf &tf, const PointPose &pi)
+    //     {
+    //         Vector3d pos = tf.rot * Vector3d(pi.x, pi.y, pi.z) + tf.pos;
+    //         Quaternd rot = tf.rot * Quaternd(pi.qw, pi.qx, pi.qy, pi.qz);
 
-//     static PointXYZI Extract3DFrom6D(const PointPose &p6D)
-//     {
-//         PointXYZI p3D;
+    //         PointPose po;
+    //         po.x  = pos.x();
+    //         po.y  = pos.y();
+    //         po.z  = pos.z();
+    //         po.qx = rot.x();
+    //         po.qy = rot.y();
+    //         po.qz = rot.z();
+    //         po.qw = rot.w();
+    //         po.t  = pi.t;
+    //         po.intensity = pi.intensity;
 
-//         p3D.x = p6D.x;
-//         p3D.y = p6D.y;
-//         p3D.z = p6D.z;
-//         p3D.intensity = p6D.intensity;
+    //         return po;
+    //     }
 
-//         return p3D;
-//     }
+    //     static PointXYZI Extract3DFrom6D(const PointPose &p6D)
+    //     {
+    //         PointXYZI p3D;
 
-//     template <typename PointT>
-//     static bool PointIsValid(const PointT &p)
-//     {
-//         return (std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z)
-//                 && !std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z));
-//     }
+    //         p3D.x = p6D.x;
+    //         p3D.y = p6D.y;
+    //         p3D.z = p6D.z;
+    //         p3D.intensity = p6D.intensity;
 
-//     template <size_t N>
-//     struct uint_
-//     {
-//     };
+    //         return p3D;
+    //     }
 
-//     template <size_t N, typename Lambda, typename IterT>
-//     void unroller(const Lambda &f, const IterT &iter, uint_<N>)
-//     {
-//         unroller(f, iter, uint_<N - 1>());
-//         f(iter + N);
-//     }
+    //     template <typename PointT>
+    //     static bool PointIsValid(const PointT &p)
+    //     {
+    //         return (std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z)
+    //                 && !std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z));
+    //     }
 
-//     template <typename Lambda, typename IterT>
-//     void unroller(const Lambda &f, const IterT &iter, uint_<0>)
-//     {
-//         f(iter);
-//     }
+    //     template <size_t N>
+    //     struct uint_
+    //     {
+    //     };
 
-//     template <typename T>
-//     static T normalizeAngle(const T& angle_degrees) {
-//       T two_pi(2.0 * 180);
-//       if (angle_degrees > 0)
-//       return angle_degrees -
-//           two_pi * std::floor((angle_degrees + T(180)) / two_pi);
-//       else
-//         return angle_degrees +
-//             two_pi * std::floor((-angle_degrees + T(180)) / two_pi);
-//     };
+    //     template <size_t N, typename Lambda, typename IterT>
+    //     void unroller(const Lambda &f, const IterT &iter, uint_<N>)
+    //     {
+    //         unroller(f, iter, uint_<N - 1>());
+    //         f(iter + N);
+    //     }
+
+    //     template <typename Lambda, typename IterT>
+    //     void unroller(const Lambda &f, const IterT &iter, uint_<0>)
+    //     {
+    //         f(iter);
+    //     }
+
+    //     template <typename T>
+    //     static T normalizeAngle(const T& angle_degrees) {
+    //       T two_pi(2.0 * 180);
+    //       if (angle_degrees > 0)
+    //       return angle_degrees -
+    //           two_pi * std::floor((angle_degrees + T(180)) / two_pi);
+    //       else
+    //         return angle_degrees +
+    //             two_pi * std::floor((-angle_degrees + T(180)) / two_pi);
+    //     };
 
 }; // namespace Util
 
@@ -1444,14 +1446,14 @@ namespace Util
 //     va_start(args, format);
 //     std::vsnprintf(&vec[0], len + 1, format.c_str(), args);
 //     va_end(args);
-    
+
 //     return string(vec.begin(), vec.end() - 1);
 // }
 
 // inline bool file_exist(const std::string& name)
 // {
-//   struct stat buffer;   
-//   return (stat (name.c_str(), &buffer) == 0); 
+//   struct stat buffer;
+//   return (stat (name.c_str(), &buffer) == 0);
 // }
 
 // inline vector<string> check_files(const string &pattern)
@@ -1467,46 +1469,21 @@ namespace Util
 //     return files;
 // }
 
-inline string zeroPaddedString(int num, int max)
-{
-    int max_digit = 0;
-    int num_digit = 0;
+inline int digits10(int x) {
+    int v = std::abs(x);
+    int d = 1;
+    while (v >= 10) { v /= 10; ++d; }
+    return d;
+};
 
-    while(true)
-    {
-        if (num == 0)
-        {
-            num_digit = 1;
-            break;
-        }
-        
-        if (pow(10, num_digit) > num)
-            break;
-        else
-            num_digit++;
-    }
+inline std::string zeroPaddedString(int num, int max) {
+    int width = digits10(max);
+    int need  = width - digits10(num);
+    if (need <= 0) return std::to_string(num);
 
-    while(true)
-    {
-        if (max == 0)
-        {
-            max_digit = 1;
-            break;
-        }
-        
-        if (pow(10, max_digit) > max)
-            break;
-        else
-            max_digit++;
-    }
+    std::string s(need, '0');
+    return s + std::to_string(num);
+};
 
-    int padded_zero = max_digit - num_digit;
-
-    string num_str;
-    for (int i = 0; i < padded_zero; i++)
-        num_str += "0";
-
-    return (num_str + std::to_string(num));
-}
 
 #endif

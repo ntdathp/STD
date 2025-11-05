@@ -14,14 +14,12 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "demo_ntu");
     ros::NodeHandle nh;
 
-    
     // Read the config
     ConfigSetting config_setting;
     read_parameters(nh, config_setting);
 
     // Create the detector
     STDescManager *std_manager = new STDescManager(config_setting);
-
 
     /* #region Declaration to database on prior map -----------------------------------------------------------------*/
 
@@ -49,7 +47,7 @@ int main(int argc, char **argv)
         std::vector<int> generated_index_vec;
         std::vector<std::pair<Vector3d, Matrix3d>> generated_poses_vec;
         std::vector<std::string> generated_times_vec;
-        std::vector<std::pair<Vector3d, Matrix3d>>generated_key_poses_vec;
+        std::vector<std::pair<Vector3d, Matrix3d>> generated_key_poses_vec;
 
         if (database_type == "csv")
         {
@@ -61,10 +59,9 @@ int main(int argc, char **argv)
             std::vector<double> generated_times_vec_;
             load_keyframes_pose_pcd(generated_pose_path, generated_index_vec,
                                     generated_poses_vec, generated_times_vec_);
-            for(int idx : generated_index_vec)
+            for (int idx : generated_index_vec)
                 generated_times_vec.push_back(std::to_string(idx));
         }
-
 
         std::cout << "Sucessfully load pose with number: "
                   << generated_poses_vec.size() << std::endl;
@@ -76,7 +73,7 @@ int main(int argc, char **argv)
         // generate descriptor database
         printf("Generating descriptors ...");
 
-        if(database_type == "csv")
+        if (database_type == "csv")
         {
             for (int cloudInd = 0; cloudInd < gen_total_size; ++cloudInd)
             {
@@ -120,7 +117,7 @@ int main(int argc, char **argv)
             {
                 std::string ori_time_str = generated_times_vec[cloudInd];
                 std::replace(ori_time_str.begin(), ori_time_str.end(), '.', '_');
-                std::string curr_lidar_path = generated_lidar_path + "KfFullPcl_" + std::to_string(cloudInd) + ".pcd";
+                std::string curr_lidar_path = generated_lidar_path + "KfCloudinW_" + zeroPaddedString(cloudInd, gen_total_size) + ".pcd";
 
                 printf("Reading scan: %s\n", curr_lidar_path.c_str());
 
@@ -162,7 +159,7 @@ int main(int argc, char **argv)
     /* #endregion Generate the data base ----------------------------------------------------------------------------*/
 
     /* #endregion Declaration to database on prior map --------------------------------------------------------------*/
-    
+
     // load STD descriptors in storage
     std_manager->loadExistingSTD(descriptor_path);
     ROS_INFO(KGRN "STD database loaded." RESET);
@@ -177,27 +174,22 @@ int main(int argc, char **argv)
 
     /* #endregion Recorded data of online localization --------------------------------------------------------------*/
 
-
     /* #region Create the publishers --------------------------------------------------------------------------------*/
 
     ros::Publisher pubOdomAftMapped = nh.advertise<nav_msgs::Odometry>("/aft_mapped_to_init", 10);
     ros::Publisher pubRegisterCloud = nh.advertise<sensor_msgs::PointCloud2>("/cloud_registered", 100);
-    ros::Publisher pubCurrentCloud  = nh.advertise<sensor_msgs::PointCloud2>("/cloud_current", 100);
+    ros::Publisher pubCurrentCloud = nh.advertise<sensor_msgs::PointCloud2>("/cloud_current", 100);
     ros::Publisher pubCurrentCorner = nh.advertise<sensor_msgs::PointCloud2>("/cloud_key_points", 100);
-    ros::Publisher pubMatchedCloud  = nh.advertise<sensor_msgs::PointCloud2>("/cloud_matched", 100);
+    ros::Publisher pubMatchedCloud = nh.advertise<sensor_msgs::PointCloud2>("/cloud_matched", 100);
     ros::Publisher pubMatchedCorner = nh.advertise<sensor_msgs::PointCloud2>("/cloud_matched_key_points", 100);
-    ros::Publisher pubSTD           = nh.advertise<visualization_msgs::MarkerArray>("descriptor_line", 10);
+    ros::Publisher pubSTD = nh.advertise<visualization_msgs::MarkerArray>("descriptor_line", 10);
 
     /* #endregion Create the publishers -----------------------------------------------------------------------------*/
 
-
-
     /////////////// localization //////////////
-
 
     bool flagStop = false;
     CloudXYZIPtr cloud_registered(new CloudXYZI());
-
 
     /* #region Loading the ground truth for reference ---------------------------------------------------------------*/
 
@@ -216,7 +208,6 @@ int main(int argc, char **argv)
         reference_time_vec.push_back(std::stod(itr));
 
     /* #endregion Loading the ground truth for reference ------------------------------------------------------------*/
-
 
     /* #region Load the localization data ---------------------------------------------------------------------------*/
 
@@ -238,10 +229,9 @@ int main(int argc, char **argv)
         ROS_ERROR("KF AND GNDTR SIZE NOT MATCH !");
 
     /* #endregion Load the localization data ------------------------------------------------------------------------*/
-    
-    
+
     ///////////// start retrieval /////////////////
-    
+
     ros::Rate loop(500);
     ros::Rate slow_loop(10);
 
@@ -266,7 +256,7 @@ int main(int argc, char **argv)
         int curr_index = localization_index_vec[cloudInd];
         std::string curr_lidar_path = localization_lidar_path + "/KfCloudinW_" + zeroPaddedString(curr_index, loc_total_size) + ".pcd";
 
-        // Load the pointcloud from memory. SHOULD be replaced subscribing to pointcloud odometry 
+        // Load the pointcloud from memory. SHOULD be replaced subscribing to pointcloud odometry
         CloudXYZIPtr current_cloud(new CloudXYZI());
         CloudXYZIPtr cloud_registered(new CloudXYZI());
         if (pcl::io::loadPCDFile<PointXYZI>(curr_lidar_path, *current_cloud) == -1)
@@ -281,31 +271,30 @@ int main(int argc, char **argv)
         myTf tf_W_B(localization_poses_vec[cloudInd].second, localization_poses_vec[cloudInd].first);
 
         // Transform pointcloud to world frame
-        pcl::transformPointCloud<PointXYZI>( *current_cloud, *current_cloud, tf_W_B.inverse().tfMat().cast<float>());
+        pcl::transformPointCloud<PointXYZI>(*current_cloud, *current_cloud, tf_W_B.inverse().tfMat().cast<float>());
 
         // Downsample the pointcloud
         down_sampling_voxel(*current_cloud, config_setting.ds_size_);
 
         /* #endregion Load the pointcloud from localization process -------------------------------------------------*/
 
-
         // check if keyframe
         if (cloudInd % config_setting.sub_frame_num_ == 0)
         {
-            std::cout << "Key Frame id: " << keyCloudInd
-                      << ", cloud size: " << current_cloud->size() << std::endl;
-            
+            // std::cout << "Key Frame id: " << keyCloudInd
+            //           << ", cloud size: " << current_cloud->size() << std::endl;
+
             // step1. Descriptor Extraction
 
             TicToc tt_desc_extr;
-            
+
             std::vector<STDesc> stds_vec;
             std_manager->GenerateSTDescsOneTime(current_cloud, stds_vec);
 
             descriptor_time.push_back(tt_desc_extr.Toc());
-            
+
             // step2. Searching Loop
-            
+
             TicToc tt_query;
 
             std::pair<int, double> search_result(-1, 0);
@@ -324,35 +313,48 @@ int main(int argc, char **argv)
 
                 myTf tf_W_B_est(loop_transform.second, loop_transform.first);
 
-                pcl::transformPointCloud<PointXYZI>(*current_cloud, *cloud_registered, tf_W_B_est.cast<float>().tfMat());
+                const Eigen::Vector3d &t = tf_W_B_est.pos;
+                const Eigen::Quaterniond &q = tf_W_B_est.rot;
+                Eigen::Vector3d ypr_rad = tf_W_B_est.rot.toRotationMatrix().eulerAngles(2, 1, 0);
+                double yaw_deg = ypr_rad[0] * 180.0 / M_PI;
+                double pitch_deg = ypr_rad[1] * 180.0 / M_PI;
+                double roll_deg = ypr_rad[2] * 180.0 / M_PI;
 
-                Vector3d gt_translation = reference_gt_pose_vec[resulted_index[keyCloudInd]].first;
-                Matrix3d gt_rotation = reference_gt_pose_vec[resulted_index[keyCloudInd]].second;
+                printf(KCYN "[tf_W_B_est] t = (%.3f, %.3f, %.3f)\n" RESET, t.x(), t.y(), t.z());
+                printf(KCYN "[tf_W_B_est] q = (w=%.6f, x=%.6f, y=%.6f, z=%.6f)\n" RESET,
+                       q.w(), q.x(), q.y(), q.z());
+                printf(KCYN "[tf_W_B_est] RPY(deg) = (R=%.2f, P=%.2f, Y=%.2f)\n" RESET,
+                       roll_deg, pitch_deg, yaw_deg);
 
-                double t_e = (gt_translation - tf_W_B_est.pos).norm();
-                double r_e = fabs(wrapTo360(SO3Log(gt_rotation * tf_W_B_est.rot.inverse()).norm() * 180 / M_PI + 180.0) - 180.0);
+                // pcl::transformPointCloud<PointXYZI>(*current_cloud, *cloud_registered, tf_W_B_est.cast<float>().tfMat());
 
-                printf(KGRN "Estimated Trans Err:  %6.3f m. Rot Err: %6.3f deg.\n" RESET, t_e, r_e);
-                
-                t_error_vec.push_back(t_e);
-                r_error_vec.push_back(r_e);
-                
-                if (r_e > 100.0)
-                    flagStop = true;
+                // Vector3d gt_translation = reference_gt_pose_vec[resulted_index[keyCloudInd]].first;
+                // Matrix3d gt_rotation = reference_gt_pose_vec[resulted_index[keyCloudInd]].second;
+
+                // double t_e = (gt_translation - tf_W_B_est.pos).norm();
+                // double r_e = fabs(wrapTo360(SO3Log(gt_rotation * tf_W_B_est.rot.inverse()).norm() * 180 / M_PI + 180.0) - 180.0);
+
+                // printf(KGRN "Estimated Trans Err:  %6.3f m. Rot Err: %6.3f deg.\n" RESET, t_e, r_e);
+
+                // t_error_vec.push_back(t_e);
+                // r_error_vec.push_back(r_e);
+
+                // if (r_e > 100.0)
+                //     flagStop = true;
             }
 
             querying_time.push_back(tt_query.Toc());
 
             // step3. Add descriptors to the database
-            std::cout << "[Time] descriptor extraction: "
-                      << tt_query.GetLastStop()
-                      << "ms, "
-                      << "query: " << tt_query.GetLastStop()
-                      << "ms, "
-                      << "update map:"
-                      << " Nan "
-                      << "ms" << std::endl;
-            std::cout << std::endl;
+            // std::cout << "[Time] descriptor extraction: "
+            //           << tt_query.GetLastStop()
+            //           << "ms, "
+            //           << "query: " << tt_query.GetLastStop()
+            //           << "ms, "
+            //           << "update map:"
+            //           << " Nan "
+            //           << "ms" << std::endl;
+            // std::cout << std::endl;
 
             // publish
             publishCloud(pubCurrentCloud, *current_cloud, ros::Time::now(), "camera_init");
@@ -363,7 +365,7 @@ int main(int argc, char **argv)
                 triggle_loop_num++;
                 publishCloud(pubMatchedCloud, *std_manager->plane_cloud_vec_[search_result.first], ros::Time::now(), "camera_init");
                 slow_loop.sleep();
-                
+
                 publishCloud(pubRegisterCloud, *cloud_registered, ros::Time::now(), "camera_init");
                 slow_loop.sleep();
 
@@ -384,40 +386,40 @@ int main(int argc, char **argv)
             keyCloudInd++;
             slow_loop.sleep();
         }
-        
+
         // Create odom for visualization
         nav_msgs::Odometry odom;
         odom.header.frame_id = "camera_init";
-        odom.pose.pose.position.x    = tf_W_B.pos(0);
-        odom.pose.pose.position.y    = tf_W_B.pos(1);
-        odom.pose.pose.position.z    = tf_W_B.pos(2);
+        odom.pose.pose.position.x = tf_W_B.pos(0);
+        odom.pose.pose.position.y = tf_W_B.pos(1);
+        odom.pose.pose.position.z = tf_W_B.pos(2);
         odom.pose.pose.orientation.w = tf_W_B.rot.w();
         odom.pose.pose.orientation.x = tf_W_B.rot.x();
         odom.pose.pose.orientation.y = tf_W_B.rot.y();
         odom.pose.pose.orientation.z = tf_W_B.rot.z();
         pubOdomAftMapped.publish(odom);
-        
+
         // Increment
         cloudInd++;
 
         loop.sleep();
     }
 
-    double mean_descriptor_time   = std::accumulate(descriptor_time.begin(), descriptor_time.end(), 0) * 1.0 / descriptor_time.size();
-    double mean_query_time        = std::accumulate(querying_time.begin(), querying_time.end(), 0) * 1.0 / querying_time.size();
-    double mean_update_time       = std::accumulate(update_time.begin(), update_time.end(), 0) * 1.0 / update_time.size();
+    double mean_descriptor_time = std::accumulate(descriptor_time.begin(), descriptor_time.end(), 0) * 1.0 / descriptor_time.size();
+    double mean_query_time = std::accumulate(querying_time.begin(), querying_time.end(), 0) * 1.0 / querying_time.size();
+    double mean_update_time = std::accumulate(update_time.begin(), update_time.end(), 0) * 1.0 / update_time.size();
     double mean_translation_error = std::accumulate(t_error_vec.begin(), t_error_vec.end(), 0) * 1.0 / t_error_vec.size();
-    double mean_rotation_error    = std::accumulate(r_error_vec.begin(), r_error_vec.end(), 0) * 1.0 / t_error_vec.size();
+    double mean_rotation_error = std::accumulate(r_error_vec.begin(), r_error_vec.end(), 0) * 1.0 / t_error_vec.size();
 
-    std::cout << "Total key frame number:"   << keyCloudInd
-              << ", loop number:"            << triggle_loop_num << std::endl;
+    std::cout << "Total key frame number:" << keyCloudInd
+              << ", loop number:" << triggle_loop_num << std::endl;
     std::cout << "Mean time for desc extr: " << mean_descriptor_time
-              << "ms, query: "               << mean_query_time
-              << "ms, update: "              << mean_update_time
-              << "ms, total: "               << mean_descriptor_time + mean_query_time + mean_update_time
-              << "ms"                        << std::endl;
-    std::cout << "Mean translation error: "  << mean_translation_error << std::endl;
-    std::cout << "Mean ratation error   : "  << mean_rotation_error << std::endl;
+              << "ms, query: " << mean_query_time
+              << "ms, update: " << mean_update_time
+              << "ms, total: " << mean_descriptor_time + mean_query_time + mean_update_time
+              << "ms" << std::endl;
+    std::cout << "Mean translation error: " << mean_translation_error << std::endl;
+    std::cout << "Mean ratation error   : " << mean_rotation_error << std::endl;
 
     return 0;
 }

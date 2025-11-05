@@ -1,0 +1,13 @@
+<launch>
+
+  <arg name="rviz" default="true" />
+  <rosparam command="load" file="$(find std_detector)/config/config_ntu.yaml" />
+  <node  pkg="std_detector" type="relocalization_ntu_online" name="relocalization_ntu" output="screen"/>
+
+  <param name="descriptor_file_path"         type="string" value = "/home/dat/data/std_reloc/priormap/saved_descriptors/"/>
+
+  <!-- <group if="$(arg rviz)">
+    <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find std_detector)/rviz_cfg/demo.rviz" />
+  </group> -->
+
+</launch>

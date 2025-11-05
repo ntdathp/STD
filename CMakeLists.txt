@@ -110,6 +110,14 @@ target_link_libraries(relocalization_ntu
         ${OpenCV_LIBS} 
         ${CERES_LIBRARIES})
 
+add_executable(relocalization_ntu_online demo/relocalization_std_online.cpp src/STDesc.cpp )
+target_link_libraries(relocalization_ntu_online 
+        ${catkin_LIBRARIES} 
+        ${PCL_LIBRARIES} 
+        ${OpenCV_LIBS} 
+        ${CERES_LIBRARIES})
+
+
 add_executable(generate_database demo/generate_database.cpp src/STDesc.cpp )
 target_link_libraries(generate_database 
         ${catkin_LIBRARIES} 
