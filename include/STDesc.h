@@ -53,14 +53,14 @@ typedef struct ConfigSetting
     double std_side_resolution_ = 0.2;
 
     /* for place recognition*/
-    int skip_near_num_ = 50;
-    int candidate_num_ = 50;
-    int sub_frame_num_ = 10;
-    double rough_dis_threshold_ = 0.03;
-    double vertex_diff_threshold_ = 0.7;
-    double icp_threshold_ = 0.5;
-    double normal_threshold_ = 0.1;
-    double dis_threshold_ = 0.3;
+    int skip_near_num_ = 1;
+    int candidate_num_ = 200;
+    int sub_frame_num_ = 50;
+    double rough_dis_threshold_ = 0.5;
+    double vertex_diff_threshold_ = 1.0;
+    double icp_threshold_ = 1.5;
+    double normal_threshold_ = 0.7;
+    double dis_threshold_ = 0.9;
 
 } ConfigSetting;
 

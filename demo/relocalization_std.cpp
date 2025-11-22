@@ -5,6 +5,9 @@
 #include "include/utility.h"
 #include "include/STDesc.h"
 
+#include <iomanip>
+#include <sstream>
+
 using namespace pcl;
 using namespace Eigen;
 using namespace Util;
@@ -77,9 +80,14 @@ int main(int argc, char **argv)
         {
             for (int cloudInd = 0; cloudInd < gen_total_size; ++cloudInd)
             {
-                std::string ori_time_str = generated_times_vec[cloudInd];
-                std::replace(ori_time_str.begin(), ori_time_str.end(), '.', '_');
-                std::string curr_lidar_path = generated_lidar_path + "cloud_" + std::to_string(cloudInd + 1) + "_" + ori_time_str + ".pcd";
+
+                std::ostringstream oss;
+                oss << generated_lidar_path
+                    << "inW_"
+                    << std::setw(6) << std::setfill('0') << cloudInd
+                    << ".pcd";
+
+                std::string curr_lidar_path = oss.str();
 
                 CloudXYZIPtr current_cloud(new CloudXYZI());
 
@@ -91,9 +99,9 @@ int main(int argc, char **argv)
                     return (-1);
                 }
 
-                myTf tf_W_B(generated_poses_vec[cloudInd].second, generated_poses_vec[cloudInd].first);
-                pcl::transformPointCloud<PointXYZI>(*current_cloud, *current_cloud, tf_W_B.cast<float>().tfMat());
-                down_sampling_voxel(*current_cloud, config_setting.ds_size_);
+                // myTf tf_W_B(generated_poses_vec[cloudInd].second, generated_poses_vec[cloudInd].first);
+                // pcl::transformPointCloud<PointXYZI>(*current_cloud, *current_cloud, tf_W_B.cast<float>().tfMat());
+                // down_sampling_voxel(*current_cloud, config_setting.ds_size_);
 
                 if (cloudInd % config_setting.sub_frame_num_ == 0)
                 {
@@ -117,7 +125,7 @@ int main(int argc, char **argv)
             {
                 std::string ori_time_str = generated_times_vec[cloudInd];
                 std::replace(ori_time_str.begin(), ori_time_str.end(), '.', '_');
-                std::string curr_lidar_path = generated_lidar_path + "cloud_" + zeroPaddedString(cloudInd, gen_total_size) + ".pcd";
+                std::string curr_lidar_path = generated_lidar_path + "KfCloudinW_" + zeroPaddedString(cloudInd, gen_total_size) + ".pcd";
 
                 printf("Reading scan: %s\n", curr_lidar_path.c_str());
 
@@ -133,7 +141,7 @@ int main(int argc, char **argv)
 
                 // myTf tf_W_B(generated_poses_vec[cloudInd].second, generated_poses_vec[cloudInd].first);
                 // pcl::transformPointCloud<PointXYZI>(*current_cloud, *current_cloud, tf_W_B.cast<float>().tfMat());
-                down_sampling_voxel(*current_cloud, config_setting.ds_size_);
+                // down_sampling_voxel(*current_cloud, config_setting.ds_size_);
 
                 if (cloudInd % config_setting.sub_frame_num_ == 0)
                 {
@@ -212,21 +220,25 @@ int main(int argc, char **argv)
     /* #region Load the localization data ---------------------------------------------------------------------------*/
 
     std::vector<std::pair<Vector3d, Matrix3d>> localization_poses_vec;
-    std::vector<double> key_frame_times_vec;
+    std::vector<string> key_frame_times_vec;
     std::vector<int> localization_index_vec;
     std::vector<std::pair<Vector3d, Matrix3d>> localization_key_poses_vec;
-    load_keyframes_pose_pcd(localization_pose_path, localization_index_vec,
-                            localization_poses_vec, key_frame_times_vec);
+    
+    // load_keyframes_pose_pcd(localization_pose_path, localization_index_vec,
+    //                         localization_poses_vec, key_frame_times_vec);
+
+    load_CSV_pose_with_time(localization_pose_path, localization_index_vec,
+                                    localization_poses_vec, key_frame_times_vec);
 
     std::cout << "Sucessfully loaded pointclouds to be relocalized: "
               << localization_poses_vec.size() << std::endl;
 
     size_t loc_total_size = localization_poses_vec.size();
 
-    std::vector<int> resulted_index = findCorrespondingFrames(key_frame_times_vec, reference_time_vec);
+    // std::vector<int> resulted_index = findCorrespondingFrames(key_frame_times_vec, reference_time_vec);
 
-    if (resulted_index.size() != key_frame_times_vec.size())
-        ROS_ERROR("KF AND GNDTR SIZE NOT MATCH !");
+    // if (resulted_index.size() != key_frame_times_vec.size())
+    //     ROS_ERROR("KF AND GNDTR SIZE NOT MATCH !");
 
     /* #endregion Load the localization data ------------------------------------------------------------------------*/
 
@@ -254,7 +266,13 @@ int main(int argc, char **argv)
 
         // Deduce the correct file name
         int curr_index = localization_index_vec[cloudInd];
-        std::string curr_lidar_path = localization_lidar_path + "/KfCloudinW_" + zeroPaddedString(curr_index, loc_total_size) + ".pcd";
+        std::ostringstream oss;
+        oss << generated_lidar_path
+            << "inW_"
+            << std::setw(6) << std::setfill('0') << cloudInd
+            << ".pcd";
+
+        std::string curr_lidar_path = oss.str();
 
         // Load the pointcloud from memory. SHOULD be replaced subscribing to pointcloud odometry
         CloudXYZIPtr current_cloud(new CloudXYZI());
@@ -274,7 +292,7 @@ int main(int argc, char **argv)
         pcl::transformPointCloud<PointXYZI>(*current_cloud, *current_cloud, tf_W_B.inverse().tfMat().cast<float>());
 
         // Downsample the pointcloud
-        down_sampling_voxel(*current_cloud, config_setting.ds_size_);
+        // down_sampling_voxel(*current_cloud, config_setting.ds_size_);
 
         /* #endregion Load the pointcloud from localization process -------------------------------------------------*/
 

@@ -1,7 +1,7 @@
 <launch>
 
   <arg name="rviz" default="true" />
-  <rosparam command="load" file="$(find std_detector)/config/config_ntu.yaml" />
+  <rosparam command="load" file="$(find std_detector)/config/config_megaparticle_outdoor.yaml" />
   <node pkg="std_detector"
         type="relocalization_ntu_online"
         name="relocalization_ntu"

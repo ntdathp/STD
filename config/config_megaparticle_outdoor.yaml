@@ -1,5 +1,5 @@
 # topic
-cloud_topic: /lastcloud
+cloud_topic: "/livox/lidar_ouster"
 
 # pre process
 ds_size: 0.25

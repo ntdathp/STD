@@ -1,11 +1,6 @@
 #include <ros/ros.h>
-#include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <sensor_msgs/PointCloud2.h>
-
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
 
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/common/transforms.h>
@@ -18,9 +13,6 @@
 #include "include/STDesc.h"  // STDescManager, STDesc
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-
-using SyncPolicy = message_filters::sync_policies::ApproximateTime<
-    nav_msgs::Odometry, sensor_msgs::PointCloud2>;
 
 using namespace Eigen;
 using namespace pcl;
@@ -41,11 +33,14 @@ int main(int argc, char **argv)
     std::string descriptor_path;
     std::string map_frame = "map";
     std::string base_frame = "body";
-    bool apply_odom_to_cloud = true;
+    bool apply_odom_to_cloud = false;
+    std::string cloud_topic = "/livox/lidar_ouster";
+
     nh.param<std::string>("descriptor_file_path", descriptor_path, std::string(""));
     nh.param<std::string>("map_frame", map_frame, map_frame);
     nh.param<std::string>("base_frame", base_frame, base_frame);
     nh.param<bool>("apply_odom_to_cloud", apply_odom_to_cloud, apply_odom_to_cloud);
+    nh.param<std::string>("cloud_topic", cloud_topic, cloud_topic);
 
     // ==============================
     // 2) Create manager in main
@@ -61,12 +56,9 @@ int main(int argc, char **argv)
     // ==============================
     ros::Publisher pub_pose = nh.advertise<geometry_msgs::PoseStamped>("/relocalization_pose", 10);
 
-    // 4) Subscribers + Synchronizer
-    message_filters::Subscriber<nav_msgs::Odometry> sub_odom(nh, "/opt_odom", 50);
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud(nh, "/lastcloud", 50);
-    message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(100), sub_odom, sub_cloud);
-
-    // Stats (local in main)
+    // ==============================
+    // 4) Stats (local in main)
+    // ==============================
     size_t frame_count = 0, keyframe_count = 0;
     int loop_count = 0;
     std::vector<double> desc_times_ms, query_times_ms;
@@ -79,21 +71,18 @@ int main(int argc, char **argv)
         STDescManager *std_manager;
         const ConfigSetting *cfg;
         ros::Publisher *pub_pose;
-        bool apply_odom_to_cloud;
+        bool apply_odom_to_cloud; // giờ luôn false, nhưng cứ để nếu sau này muốn dùng lại
         std::string map_frame;
 
-        
         size_t *frame_count;
         size_t *keyframe_count;
         int *loop_count;
         std::vector<double> *desc_times_ms;
         std::vector<double> *query_times_ms;
 
-       
         typedef void result_type;
 
-        void operator()(const nav_msgs::OdometryConstPtr &odom_msg,
-                        const sensor_msgs::PointCloud2ConstPtr &cloud_msg) const
+        void operator()(const sensor_msgs::PointCloud2ConstPtr &cloud_msg) const
         {
             (*frame_count)++;
 
@@ -101,22 +90,11 @@ int main(int argc, char **argv)
             CloudXYZIPtr current_cloud(new CloudXYZI());
             pcl::fromROSMsg(*cloud_msg, *current_cloud);
 
-            // W_T_B from odom
-            const auto &p = odom_msg->pose.pose.position;
-            const auto &q = odom_msg->pose.pose.orientation;
-            Eigen::Quaterniond q_wb(q.w, q.x, q.y, q.z);
-            Eigen::Vector3d t_wb(p.x, p.y, p.z);
-            myTf tf_W_B(q_wb.toRotationMatrix(), t_wb);
+            // Không còn odom nên bỏ đoạn W_T_B, transform theo odom
+            // if (apply_odom_to_cloud) { ... }  // bỏ hẳn
 
-            // parity với offline: đưa cloud về W nếu cần
-            if (apply_odom_to_cloud)
-            {
-                pcl::transformPointCloud<PointXYZI>(*current_cloud, *current_cloud,
-                                                    tf_W_B.inverse().tfMat().cast<float>());
-            }
-
-            // Downsample
-            down_sampling_voxel(*current_cloud, cfg->ds_size_);
+            // Downsample nếu muốn
+            // down_sampling_voxel(*current_cloud, cfg->ds_size_);
 
             // Keyframe gating
             if (((*frame_count) - 1) % cfg->sub_frame_num_ != 0)
@@ -159,7 +137,8 @@ int main(int argc, char **argv)
                 Eigen::Quaterniond qe_yaw(Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()));
 
                 geometry_msgs::PoseStamped msg;
-                msg.header.stamp = odom_msg->header.stamp;
+                // dùng stamp của cloud
+                msg.header.stamp = cloud_msg->header.stamp;
                 msg.header.frame_id = map_frame;
 
                 msg.pose.position.x = t.x();
@@ -189,7 +168,13 @@ int main(int argc, char **argv)
         /* desc_times_ms      */ &desc_times_ms,
         /* query_times_ms     */ &query_times_ms};
 
-    sync.registerCallback(boost::bind(&RelocCB::operator(), &cb, _1, _2));
+    // ==============================
+    // 5) Subscriber cloud ONLY
+    // ==============================
+    ros::Subscriber sub_cloud = nh.subscribe<sensor_msgs::PointCloud2>(
+        cloud_topic, 50,
+        boost::bind(&RelocCB::operator(), &cb, _1));
+
     // ==============================
     // 6) Spin & print stats on shutdown
     // ==============================
@@ -201,6 +186,7 @@ int main(int argc, char **argv)
             return 0.0;
         return std::accumulate(v.begin(), v.end(), 0.0) / v.size();
     };
+
     ROS_INFO("Total frames=%zu, keyframes=%zu, loop triggers=%d",
              frame_count, keyframe_count, loop_count);
     ROS_INFO("Mean times: desc=%.3f ms, query=%.3f ms",
