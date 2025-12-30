@@ -16,9 +16,9 @@ proj_dis_max: 5
 corner_thre: 10
 
 # std descriptor
-descriptor_near_num: 10
+descriptor_near_num: 50
 descriptor_min_len: 2
-descriptor_max_len: 50
+descriptor_max_len: 100
 non_max_suppression_radius: 2
 std_side_resolution: 0.2
 

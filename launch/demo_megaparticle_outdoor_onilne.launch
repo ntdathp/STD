@@ -1,21 +1,13 @@
 <launch>
 
-  <arg name="rviz" default="true" />
   <rosparam command="load" file="$(find std_detector)/config/config_megaparticle_outdoor.yaml" />
+  <param name="descriptor_file_path"         type="string" value = "/home/dat/data/std_reloc/megaparticle/saved_descriptors_outdoor_kidnap/"/>
   <node pkg="std_detector"
         type="relocalization_ntu_online"
         name="relocalization_ntu"
         output="screen">
-        
-    <!-- Remap /relocalization_pose -> /uwb_pose -->
-    <remap from="/relocalization_pose" to="/uwb_pose"/>
 
+    <remap from="/relocalization_pose" to="/seed_pose"/>
   </node>
-
-  <param name="descriptor_file_path"         type="string" value = "/home/dat/data/std_reloc/megaparticle/saved_descriptors_oudoor_kidnap/"/>
-
-  <!-- <group if="$(arg rviz)">
-    <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find std_detector)/rviz_cfg/demo.rviz" />
-  </group> -->
 
 </launch>
