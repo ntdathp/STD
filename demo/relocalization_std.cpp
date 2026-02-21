@@ -83,7 +83,6 @@ int main(int argc, char **argv)
 
                 std::ostringstream oss;
                 oss << generated_lidar_path
-                    << "inW_"
                     << std::setw(6) << std::setfill('0') << cloudInd
                     << ".pcd";
 
@@ -268,7 +267,7 @@ int main(int argc, char **argv)
         int curr_index = localization_index_vec[cloudInd];
         std::ostringstream oss;
         oss << generated_lidar_path
-            << "inW_"
+            << ""
             << std::setw(6) << std::setfill('0') << cloudInd
             << ".pcd";
 

@@ -29,6 +29,6 @@ sub_frame_num: 1
 vertex_diff_threshold: 0.5
 rough_dis_threshold: 0.5
 normal_threshold: 0.5
-dis_threshold: 0.7
-icp_threshold: 0.7
+dis_threshold: 0.6
+icp_threshold: 0.6
 
